@@ -1,0 +1,19 @@
+{
+  "name": "bunchat",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch server/server.ts",
+    "start": "bun server/server.ts",
+    "check": "bunx tsc --noEmit",
+    "test": "bun test"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  }
+}

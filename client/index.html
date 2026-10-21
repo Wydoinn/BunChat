@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fff7ed" />
+    <meta name="description" content="A private chat room that lives in memory only. Nothing is saved, and it burns away when the last person leaves." />
+    <title>BunChat — chats that burn</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <!-- Icon sprite sheet: every symbol below is referenced elsewhere via
+         <svg class="icon"><use href="#icon-NAME"/></svg>. Kept as plain SVG
+         primitives (rects/circles/paths with currentColor) instead of an
+         icon font or emoji, so every icon renders identically everywhere
+         instead of depending on which glyphs a given OS/browser ships. -->
+    <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+      <symbol id="icon-bun" viewBox="0 0 32 32">
+        <path d="M16 8c-6.1 0-10.2 3.9-10.2 9.6C5.8 23.3 10.1 26.4 16 26.4s10.2-3.1 10.2-8.8C26.2 11.9 22.1 8 16 8Z" fill="currentColor"/>
+        <path d="M12.5 12.9c1-1.3 2.1-2 3.5-2s2.5.7 3.5 2" stroke="rgba(255,255,255,.6)" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </symbol>
+      <symbol id="icon-chevron" viewBox="0 0 24 24">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-arrow" viewBox="0 0 24 24">
+        <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-paperclip" viewBox="0 0 24 24">
+        <path d="M21.4 11.1 12.3 20.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.9l8.5-8.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-send" viewBox="0 0 24 24">
+        <path d="M3 11.5 20.5 4 13 21l-2.6-6.9L3 11.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-copy" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-share" viewBox="0 0 24 24">
+        <circle cx="18" cy="5" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="6" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="18" cy="19" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M8.3 10.6 15.7 6.4M8.3 13.4l7.4 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24">
+        <rect x="5" y="11" width="14" height="9" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 3v2.4M12 18.6V21M4.4 12H2M22 12h-2.4M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24">
+        <rect x="3" y="4.5" width="18" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="9.5" r="1.6" fill="currentColor"/>
+        <path d="M4 16.5l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </symbol>
+      <symbol id="icon-sparkle" viewBox="0 0 24 24">
+        <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" fill="currentColor"/>
+        <path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" fill="currentColor" opacity=".65"/>
+      </symbol>
+      <symbol id="icon-users" viewBox="0 0 24 24">
+        <circle cx="9" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 11a2.8 2.8 0 1 0 0-5.6M16.5 14.2a4.8 4.8 0 0 1 4 4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-mic" viewBox="0 0 24 24">
+        <rect x="8" y="3" width="8" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </symbol>
+      <symbol id="icon-reply" viewBox="0 0 24 24">
+        <path d="M9 8 4 12l5 4v-3c5.5 0 8.5 2 10 5-.4-5-3-9-10-9V8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </symbol>
+    </svg>
+
+    <div id="burn-overlay" class="burn-overlay" aria-hidden="true"></div>
+
+    <main class="shell">
+      <!-- ============================== HOME ============================== -->
+      <section id="view-landing" class="view landing" aria-labelledby="brand-title">
+        <div class="topbar">
+          <span class="brand"><svg class="icon bun-mark" aria-hidden="true"><use href="#icon-bun"/></svg><span>BunChat</span></span>
+        </div>
+        <div class="landing-inner">
+          <div class="hero">
+            <p class="eyebrow"><span class="eyebrow-dot"></span>Private · temporary · no sign-up</p>
+            <h1 id="brand-title">Talk freely. Leave no trace.</h1>
+            <p class="hero-sub">BunChat is a simple, private room for the moments you want to share now and forget later.</p>
+            <div class="home-actions">
+              <a class="button primary" href="/start"><span>Enter BunChat</span><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+            </div>
+          </div>
+          <div class="home-notes">
+            <div class="home-note"><span class="note-number">01</span><strong>Make a room</strong><span>Set up a private space in seconds.</span></div>
+            <div class="home-note"><span class="note-number">02</span><strong>Share the link</strong><span>Invite only the people you choose.</span></div>
+            <div class="home-note"><span class="note-number">03</span><strong>It disappears</strong><span>When everyone leaves, it is gone.</span></div>
+          </div>
+        </div>
+        <p class="landing-foot">No accounts. No cookies. No servers keeping notes.</p>
+      </section>
+
+      <!-- ============================== ROOM SETUP ============================== -->
+      <section id="view-actions" class="view actions-page hidden" aria-labelledby="actions-title">
+        <div class="actions-topbar">
+          <a class="brand" href="/"><svg class="icon bun-mark" aria-hidden="true"><use href="#icon-bun"/></svg><span>BunChat</span></a>
+          <a class="text-button" href="/">Back home</a>
+        </div>
+        <div class="actions-inner">
+          <div class="actions-heading">
+            <p class="eyebrow"><span class="eyebrow-dot"></span>Your next conversation</p>
+            <h1 id="actions-title">Where should we go?</h1>
+            <p class="hero-sub">Start somewhere new, or use an invite from a friend.</p>
+          </div>
+          <div class="setup-intro"><span class="setup-step">01</span><span>Choose how you want to connect</span><span class="setup-line"></span><span class="setup-note">No account needed</span></div>
+          <div class="landing-grid">
+            <form id="create-form" class="card action-card" autocomplete="off">
+              <span class="card-icon"><svg class="icon" aria-hidden="true"><use href="#icon-sparkle"/></svg></span>
+              <span class="card-kicker">Create</span>
+              <h2>Start a fresh room</h2>
+              <p class="card-sub">Create a private link to share with your people.</p>
+
+              <label class="field">
+                <span class="field-label">Room password <em>(optional)</em></span>
+                <input id="create-password" type="password" maxlength="128" placeholder="Add a little lock" autocomplete="new-password" />
+              </label>
+
+              <details class="advanced">
+                <summary>
+                  <span>More options</span>
+                  <svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg>
+                </summary>
+                <div class="advanced-body">
+                  <label class="field">
+                    <span class="field-label">Your name</span>
+                    <input id="create-name" maxlength="32" placeholder="" />
+                  </label>
+                  <label class="field">
+                    <span class="field-label">Room name <em>(optional)</em></span>
+                    <input id="create-topic" maxlength="40" placeholder="e.g. Movie night plans" />
+                  </label>
+                  <div class="field">
+                    <span class="field-label">How long should it live?</span>
+                    <div id="create-ttl" class="pill-group" role="radiogroup" aria-label="Room lifetime"></div>
+                  </div>
+                  <div class="field">
+                    <span class="field-label">How many buns can join?</span>
+                    <div id="create-max-users" class="pill-group" role="radiogroup" aria-label="Participant limit"></div>
+                  </div>
+                  <label class="toggle-row">
+                    <span class="toggle-copy">
+                      <span class="field-label">Allow images</span>
+                      <span class="field-hint">Turn off to keep it text-only.</span>
+                    </span>
+                    <span class="toggle">
+                      <input id="create-images" type="checkbox" checked />
+                      <span class="toggle-track" aria-hidden="true"></span>
+                    </span>
+                  </label>
+                </div>
+              </details>
+
+              <button class="button primary" type="submit">
+                <span>Create room</span>
+                <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
+              </button>
+            </form>
+
+            <form id="join-form" class="card card-secondary action-card join-card" autocomplete="off">
+              <span class="card-icon"><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></span>
+              <span class="card-kicker">Join</span>
+              <h2>Join a room</h2>
+              <p class="card-sub">Have an invite? Bring your room code.</p>
+              <label class="field">
+                <span class="field-label">Room ID</span>
+                <input id="join-room-id" required maxlength="16" pattern="[a-zA-Z0-9]+" placeholder="e.g. 1234567890" />
+              </label>
+              <button class="button secondary" type="submit">Continue</button>
+            </form>
+          </div>
+          <p class="setup-foot"><svg class="icon" aria-hidden="true"><use href="#icon-lock"/></svg> Rooms are temporary, encrypted in transit, and never saved to disk.</p>
+        </div>
+      </section>
+
+      <!-- ============================== JOIN GATE ============================== -->
+      <section id="view-gate" class="view gate hidden" aria-label="Join room">
+        <a class="brand brand-link" href="/"><svg class="icon bun-mark" aria-hidden="true"><use href="#icon-bun"/></svg><span>BunChat</span></a>
+        <div id="gate-card" class="card gate-card"></div>
+        <a class="text-button gate-back" href="/">← Not your invite? Go home</a>
+      </section>
+
+      <!-- ============================== CHAT ============================== -->
+      <section id="view-chat" class="view chat hidden" aria-live="polite">
+        <header class="chat-header">
+          <a class="brand" href="/"><svg class="icon bun-mark" aria-hidden="true"><use href="#icon-bun"/></svg><span>BunChat</span></a>
+          <div class="room-meta">
+            <span id="room-label">Room</span>
+            <span class="dot">·</span>
+            <span id="burn-timer" class="burn-timer">Burns in 30:00</span>
+            <span id="connection-status" class="connection-status"><span class="status-dot"></span><span>Connected</span></span>
+          </div>
+          <button id="leave-button" class="text-button" type="button">Leave room</button>
+        </header>
+        <div class="chat-layout">
+          <aside class="sidebar">
+            <section class="side-card">
+              <h2>Invite friends</h2>
+              <p>Share the link, or just the room ID.</p>
+              <div class="copy-row">
+                <input id="invite-link" readonly aria-label="Invite link" />
+                <button id="copy-link" class="icon-button" type="button" title="Copy invite link" aria-label="Copy invite link"><svg class="icon" aria-hidden="true"><use href="#icon-copy"/></svg></button>
+                <button id="share-link" class="icon-button hidden" type="button" title="Share invite link" aria-label="Share invite link"><svg class="icon" aria-hidden="true"><use href="#icon-share"/></svg></button>
+              </div>
+              <div class="copy-row room-id-row">
+                <span class="room-id-tag">ID</span>
+                <input id="room-id-value" readonly aria-label="Room ID" />
+                <button id="copy-room-id" class="icon-button" type="button" title="Copy room ID" aria-label="Copy room ID"><svg class="icon" aria-hidden="true"><use href="#icon-copy"/></svg></button>
+              </div>
+            </section>
+            <section class="side-card">
+              <h2>Room status</h2>
+              <p id="privacy-status" class="privacy-status">Open room</p>
+              <p id="user-count" class="user-count"><svg class="icon" aria-hidden="true"><use href="#icon-users"/></svg><span>0 buns here</span></p>
+              <div id="users" class="users"></div>
+            </section>
+          </aside>
+          <section class="conversation" aria-label="Conversation">
+            <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Messages"></div>
+            <p id="typing-indicator" class="typing-indicator hidden" aria-live="polite"></p>
+            <button id="jump-latest" class="jump-latest hidden" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#icon-chevron"/></svg>
+              New messages
+            </button>
+            <div id="drop-overlay" class="drop-overlay hidden" aria-hidden="true">
+              <svg class="icon" aria-hidden="true"><use href="#icon-image"/></svg>
+              Drop image to share
+            </div>
+            <form id="message-form" class="composer">
+              <label id="upload-label" class="upload-button" title="Share image" role="button" tabindex="0" aria-label="Share image">
+                <input id="image-input" type="file" accept="image/png,image/jpeg,image/gif,image/webp" />
+                <svg class="icon" aria-hidden="true"><use href="#icon-paperclip"/></svg>
+              </label>
+              <button id="voice-button" class="upload-button voice-button" type="button" title="Record voice message" aria-label="Record voice message"><svg class="icon" aria-hidden="true"><use href="#icon-mic"/></svg></button>
+              <textarea id="message-input" maxlength="2000" placeholder="Write a message…" aria-label="Message" aria-describedby="message-count" rows="1"></textarea>
+              <span id="message-count" class="message-count">0/2000</span>
+              <button class="button primary send" type="submit" aria-label="Send message"><svg class="icon" aria-hidden="true"><use href="#icon-send"/></svg></button>
+            </form>
+            <div id="reply-bar" class="reply-bar hidden">
+              <svg class="icon" aria-hidden="true"><use href="#icon-reply"/></svg>
+              <span id="reply-label"></span>
+              <button id="cancel-reply" class="icon-button" type="button" aria-label="Cancel reply"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close image preview"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+      <img id="lightbox-image" alt="" />
+    </div>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

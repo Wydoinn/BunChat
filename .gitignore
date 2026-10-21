@@ -1,0 +1,12 @@
+node_modules/
+bun.lockb
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage/
+dist/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
